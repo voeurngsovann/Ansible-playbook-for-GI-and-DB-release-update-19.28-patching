@@ -1,21 +1,30 @@
-Instruction of using this ansible playbook for patch GI and DB 19.28 and other oneoffpatch 
-go to GIRU folder and run 
+# Ansible-Playbooks-Patching-GI-DB--19.28 and other oneoffpatch
+This is the Ansible Playbooks for Patching Oracle RAC both Grid and Database Release Update 19.28
+# prerequisite
+  you’ll need to download the following setup files from Oracle Support and upload in ansible server
+ - /installer/software/GI28
+ - /installer/software/DB28
+# configure ansible passwordless to targets servers for root,grid and oracle user 
+  - [ansible@ansible-server giru]$ cat hosts 
+
+       [dbservers]
+      dev-dbserver01.localdomain    ansible_python_interpreter=/usr/bin/python3.6
+      dev-dbserver02.localdomain    ansible_python_interpreter=/usr/bin/python3.6
+
+# configure root passwordless
+
+[ansible@ansible-server giru]$ansible all -i hosts -k -u root -m authorized_key -a "user=root state=present key=\"{{ lookup('file','/home/ansible/.ssh/id_rsa.pub') }}\""
+
+# configure grid passwordless
+
+[ansible@ansible-server giru]$ ansible all -i hosts -k -u grid -m authorized_key -a "user=grid state=present key=\"{{ lookup('file','/home/ansible/.ssh/id_rsa.pub') }}\""
+
+
+# configure oracle passwordless
+
+[ansible@ansible-server giru]$ ansible all -i hosts -k -u oracle -m authorized_key -a "user=oracle state=present key=\"{{ lookup('file','/home/ansible/.ssh/id_rsa.pub') }}\""
+
+# running using command  for patchng GI
 ansible-playbook -i hosts apply_grid_update_main.yml -vvv
-go to DBRU folder and run 
+# running using command  for patchng DB
 ansible-playbook -i hosts apply_db_update_main.yml -vvv
-the expectation in your host should have client servers
-
-the expectation and requirement  in your ansible servers to client servers need to configure passwordless both root, oracle and grid user 
-Adjust patch directory in your clients  and source_patch_dir in your ansible server accourdingly based on space available , example  
-patch_dir: /soft
-source_patch_dir: /installer/software/DB28 
-[ansible@ansible-server]$ cat hosts
-[dbservers]
-dbserver-01
-dbserver-02
-
-[ansible@ansible-server]$ ansible all -i hosts -k -u root -m authorized_key -a "user=root state=present key=\"{{ lookup('file','/home/ansible/.ssh/id_rsa.pub') }}\""
-[ansible@ansible-server]$ ansible all -i hosts -k -u grid -m authorized_key -a "user=oracle state=present key=\"{{ lookup('file','/home/ansible/.ssh/id_rsa.pub') }}\""
-[ansible@ansible-server]$ ansible all -i hosts -k -u oracle -m authorized_key -a "user=oracle state=present key=\"{{ lookup('file','/home/ansible/.ssh/id_rsa.pub') }}\""
-
- 
